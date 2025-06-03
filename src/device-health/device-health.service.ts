@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as mqtt from 'mqtt';
 import { envs } from 'src/config/envs';
+import { CustomRpcException } from 'src/interfaces/ErrorResponse';
 
 @Injectable()
 export class DeviceHealthService implements OnModuleInit {
@@ -30,7 +31,9 @@ export class DeviceHealthService implements OnModuleInit {
       const timeout = setTimeout(() => {
         this.mqttClient.unsubscribe(replyTopic);
         this.mqttClient.removeListener('message', messageHandler);
-        reject(new Error(`Ping timeout for device ${deviceId}`));
+        reject(
+          new CustomRpcException(503, `Ping timeout for device ${deviceId}`),
+        );
       }, 5000);
 
       const messageHandler = (topic, message) => {
